@@ -4,7 +4,9 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "arcade>=3.3.3",
+]
 [tool.ruff.lint]
 select = ["ANN"]
 
@@ -14,3 +16,6 @@ dev = [
     "ruff>=0.15.1",
     "ty>=0.0.17",
 ]
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
