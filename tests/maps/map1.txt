@@ -1,0 +1,27 @@
+width: 40
+height: 15
+---
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+x  *               S     x             x
+x                        x    *   *    x
+x                      * x             x
+x         s        xxxxxxx            sx
+x     xxx *   xx                       x
+x                            xxx       x
+x            xxxxxxxxxx        x       x
+x         *                    x   *   x
+x      S              S     *  x       x
+x  *            *                      x
+x                                      x
+x     xx     s        xs               x
+x  P      *           x       *        x
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+---
+
+# Correspondance entre les caractères du fichier de carte et les types de cellule
+# ' ' -> GRASS
+# 'x' -> BUSH
+# '*' -> CRYSTAL
+# 's' -> spinner horizontal (géré plus tard)
+# 'S' -> spinner vertical (géré plus tard)
+# 'P' -> position de départ du joueur

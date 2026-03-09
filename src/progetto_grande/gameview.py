@@ -1,5 +1,6 @@
 from typing import Final
 import arcade
+from progetto_grande.map import Map, GridCell
 
 from progetto_grande.constants import (
     MAX_WINDOW_WIDTH,
@@ -34,20 +35,21 @@ class GameView(arcade.View):
     physics_engine: Final[arcade.PhysicsEngineSimple]
     camera: Final[arcade.Camera2D]
 
-    def __init__(self) -> None:
+    def __init__(self, game_map: Map) -> None:
         super().__init__()
+        self.map = game_map
 
         # Background + world size
         self.background_color = arcade.csscolor.CORNFLOWER_BLUE
-        self.world_width = 40 * TILE_SIZE
-        self.world_height = 20 * TILE_SIZE
+        self.world_width = self.map.width * TILE_SIZE
+        self.world_height = self.map.height * TILE_SIZE
 
         # Player sprite
         self.player = arcade.TextureAnimationSprite(
             animation=ANIMATION_PLAYER_IDLE_DOWN,
             scale=SCALE,
-            center_x=grid_to_pixels(2),
-            center_y=grid_to_pixels(2),
+            center_x=grid_to_pixels(self.map.player_start_x),
+            center_y=grid_to_pixels(self.map.player_start_y),
         )
 
         # Player list (for efficient drawing)
@@ -59,18 +61,8 @@ class GameView(arcade.View):
         self.walls = arcade.SpriteList(use_spatial_hash=True)
         self.crystals = arcade.SpriteList(use_spatial_hash=True)
 
-        for (x, y) in [(5, 2), (6, 5), (3, 5)]:
-            crystal = arcade.TextureAnimationSprite(
-                animation=ANIMATION_CRYSTAL,
-                scale=SCALE,
-                center_x=grid_to_pixels(x),
-                center_y=grid_to_pixels(y),
-            )
-            self.crystals.append(crystal)
-
-        # Fill with grass (40 x 20 tiles)
-        for x in range(40):
-            for y in range(20):
+        for y in range(self.map.height):
+            for x in range(self.map.width):
                 self.grounds.append(
                     arcade.Sprite(
                         TEXTURE_GRASS,
@@ -80,40 +72,25 @@ class GameView(arcade.View):
                     )
                 )
 
-        # Add bushes (walls)
-        for (x, y) in [(3, 6), (7, 2), (2, 10), (3, 8)]:
-            self.walls.append(
-                arcade.Sprite(
-                    TEXTURE_BUSH,
-                    scale=SCALE,
-                    center_x=grid_to_pixels(x),
-                    center_y=grid_to_pixels(y),
-                )
-            )
+                cell = self.map.get(x, y)
 
-        # Bush border (world limits)
-        for x in range(40):
-            for y in (0, 19):
-                self.walls.append(
-                    arcade.Sprite(
-                        TEXTURE_BUSH,
+                if cell == GridCell.BUSH:
+                    self.walls.append(
+                        arcade.Sprite(
+                            TEXTURE_BUSH,
+                            scale=SCALE,
+                            center_x=grid_to_pixels(x),
+                            center_y=grid_to_pixels(y),
+                        )
+                    )
+                elif cell == GridCell.CRYSTAL:
+                    crystal = arcade.TextureAnimationSprite(
+                        animation=ANIMATION_CRYSTAL,
                         scale=SCALE,
                         center_x=grid_to_pixels(x),
                         center_y=grid_to_pixels(y),
                     )
-                )
-
-        for y in range(20):
-            for x in (0, 39):
-                self.walls.append(
-                    arcade.Sprite(
-                        TEXTURE_BUSH,
-                        scale=SCALE,
-                        center_x=grid_to_pixels(x),
-                        center_y=grid_to_pixels(y),
-                    )
-                )
-
+                    self.crystals.append(crystal)
         # Physics engine (player collides with walls)
         self.physics_engine = arcade.PhysicsEngineSimple(self.player, self.walls)
         self.camera = arcade.camera.Camera2D()
@@ -149,7 +126,7 @@ class GameView(arcade.View):
             case arcade.key.UP | arcade.key.DOWN:
                 self.player.change_y = 0
             case arcade.key.ESCAPE:
-                new_view = GameView()
+                new_view = GameView(self.map)
                 self.window.show_view(new_view)
 
     def on_update(self, delta_time: float) -> None:
