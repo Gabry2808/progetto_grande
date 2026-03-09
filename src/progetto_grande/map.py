@@ -6,7 +6,6 @@ class GridCell(Enum):
     BUSH = 1
     CRYSTAL = 2
 
-
 class Map:
     def __init__(
     self,
@@ -29,6 +28,10 @@ class Map:
             raise IndexError("y out of bounds")
 
         return self._grid[y][x]
+
+# Exception utilisée lorsque le fichier de la carte contient une erreur
+class InvalidMapFileException(Exception):
+    pass
 
 # Création d'une grille remplie d'herbe
 grid_decouverte = [
@@ -61,3 +64,11 @@ MAP_DECOUVERTE = Map(
     player_start_x=2,
     player_start_y=2,
 )
+
+# Correspondance entre les caractères du fichier de carte et les types de cellule
+# ' ' -> GRASS
+# 'x' -> BUSH
+# '*' -> CRYSTAL
+# 's' -> spinner horizontal (géré plus tard)
+# 'S' -> spinner vertical (géré plus tard)
+# 'P' -> position de départ du joueur
