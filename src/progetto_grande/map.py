@@ -48,7 +48,7 @@ for y in range(20):
     grid_decouverte[y][0] = GridCell.BUSH # Colonne de gauche (x = 0)
     grid_decouverte[y][39] = GridCell.BUSH # Colonne de droite (x = 39)
 
-# Buissons à l'intérieur de la carte
+# Buissons
 for x, y in [(3, 6), (7, 2), (2, 10), (3, 8)]:
     grid_decouverte[y][x] = GridCell.BUSH
 

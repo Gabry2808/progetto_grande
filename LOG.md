@@ -1,6 +1,6 @@
 # DevLog
 
-## Semaine 1 — Découverte d’Arcade
+## Semaine 1 — Découverte d’Arcade (Gabry)
 
 ### Setup du projet
 Temps: ~30 min
@@ -33,7 +33,27 @@ Temps: ~30 min
 - des cristaux collectables
 - un premier test automatisé
 
+### Amélioration des contrôles clavier
+Temps: ~1h
 
+- correction du problème de gestion des touches simultanées
+- implémentation d’un système avec états (`go_right`, `go_left`, etc.)
+- amélioration du comportement du joueur lors des changements de direction
+
+### Amélioration de la caméra
+Temps: ~1h
+
+- implémentation d’une marge autour du joueur
+- la caméra ne suit plus immédiatement le joueur
+- déplacement de la caméra uniquement lorsque le joueur s’approche des bords
+- conservation du clamp pour éviter de sortir du monde
+
+### Ajout des sons
+Temps: ~20 min
+
+- chargement d’un son avec `arcade.load_sound`
+- lecture du son lors de la collecte des cristaux avec `arcade.play_sound`
+- séparation entre chargement (init) et utilisation (runtime)
 
 
 

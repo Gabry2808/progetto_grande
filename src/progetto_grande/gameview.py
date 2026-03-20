@@ -56,6 +56,15 @@ class GameView(arcade.View):
         self.player_list = arcade.SpriteList()
         self.player_list.append(self.player)
 
+        # actual directions required for the joueur
+        self.go_right = False
+        self.go_left = False
+        self.go_up = False
+        self.go_down = False
+        # Last direction requested on each axis
+        self.last_horizontal = 0   # 1 = right, -1 = left, 0 = none
+        self.last_vertical = 0     # 1 = up, -1 = down, 0 = none
+
         # World sprite lists
         self.grounds = arcade.SpriteList(use_spatial_hash=True)
         self.walls = arcade.SpriteList(use_spatial_hash=True)
@@ -91,9 +100,13 @@ class GameView(arcade.View):
                         center_y=grid_to_pixels(y),
                     )
                     self.crystals.append(crystal)
+
         # Physics engine (player collides with walls)
         self.physics_engine = arcade.PhysicsEngineSimple(self.player, self.walls)
         self.camera = arcade.camera.Camera2D()
+
+        # Load sound once
+        self.collect_sound = arcade.load_sound(":resources:sounds/coin5.wav")
 
     def on_show_view(self) -> None:
         self.window.width = min(MAX_WINDOW_WIDTH, self.world_width)
@@ -111,25 +124,46 @@ class GameView(arcade.View):
     def on_key_press(self, symbol: int, modifiers: int) -> None:
         match symbol:
             case arcade.key.RIGHT:
-                self.player.change_x = +PLAYER_MOVEMENT_SPEED
+                self.go_right = True
+                self.last_horizontal = 1
             case arcade.key.LEFT:
-                self.player.change_x = -PLAYER_MOVEMENT_SPEED
+                self.go_left = True
+                self.last_horizontal = -1
             case arcade.key.UP:
-                self.player.change_y = +PLAYER_MOVEMENT_SPEED
+                self.go_up = True
+                self.last_vertical = 1
             case arcade.key.DOWN:
-                self.player.change_y = -PLAYER_MOVEMENT_SPEED
+                self.go_down = True
+                self.last_vertical = -1
 
     def on_key_release(self, symbol: int, modifiers: int) -> None:
         match symbol:
-            case arcade.key.RIGHT | arcade.key.LEFT:
-                self.player.change_x = 0
-            case arcade.key.UP | arcade.key.DOWN:
-                self.player.change_y = 0
+            case arcade.key.RIGHT:
+                self.go_right = False
+            case arcade.key.LEFT:
+                self.go_left = False
+            case arcade.key.UP:
+                self.go_up = False
+            case arcade.key.DOWN:
+                self.go_down = False
             case arcade.key.ESCAPE:
                 new_view = GameView(self.map)
                 self.window.show_view(new_view)
 
     def on_update(self, delta_time: float) -> None:
+        # Horizontal movement
+        self.player.change_x = (
+            self.last_horizontal * PLAYER_MOVEMENT_SPEED
+            if self.go_right and self.go_left
+            else (PLAYER_MOVEMENT_SPEED if self.go_right else (-PLAYER_MOVEMENT_SPEED if self.go_left else 0))
+        )
+
+        # Vertical movement
+        self.player.change_y = (
+            self.last_vertical * PLAYER_MOVEMENT_SPEED
+            if self.go_up and self.go_down
+            else (PLAYER_MOVEMENT_SPEED if self.go_up else (-PLAYER_MOVEMENT_SPEED if self.go_down else 0))
+        )
         # Physics
         self.physics_engine.update()
 
@@ -139,21 +173,24 @@ class GameView(arcade.View):
 
         # Camera follow
         target_x, target_y = self.player.position
+        camera_x, camera_y = self.camera.position
 
-        half_width = self.window.width / 2
-        half_height = self.window.height / 2
+        MARGIN = 100
+        if abs(target_x - camera_x) > MARGIN:
+            camera_x = target_x - MARGIN if target_x > camera_x else target_x + MARGIN
+        if abs(target_y - camera_y) > MARGIN:
+            camera_y = target_y - MARGIN if target_y > camera_y else target_y + MARGIN
 
-        min_x = half_width
-        max_x = self.world_width - half_width
-        min_y = half_height
-        max_y = self.world_height - half_height
+        half_camera_width = self.window.width / 2
+        half_camera_height  = self.window.height / 2
 
-        clamped_x = max(min_x, min(target_x, max_x))
-        clamped_y = max(min_y, min(target_y, max_y))
+        camera_x = max(half_camera_width, min(camera_x, self.world_width - half_camera_width))
+        camera_y = max(half_camera_height, min(camera_y, self.world_height - half_camera_height))
 
-        self.camera.position = (clamped_x, clamped_y)
+        self.camera.position = (camera_x, camera_y)
 
         # Crystal collision
         hit_crystals = arcade.check_for_collision_with_list(self.player, self.crystals)
         for c in hit_crystals:
             c.remove_from_sprite_lists()
+            arcade.play_sound(self.collect_sound)
