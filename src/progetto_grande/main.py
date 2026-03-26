@@ -1,6 +1,6 @@
 import arcade
 
-from progetto_grande.constants import MAX_WINDOW_HEIGHT, MAX_WINDOW_WIDTH, WINDOW_TITLE
+from progetto_grande.constants import *
 from progetto_grande.gameview import GameView
 from progetto_grande.map import MAP_DECOUVERTE
 

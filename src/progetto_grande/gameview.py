@@ -1,6 +1,6 @@
 from typing import Final
 import arcade
-from progetto_grande.map import Map, GridCell
+from progetto_grande.map import Map, GridCell, SpinnerMove, limites_spinner
 
 from progetto_grande.constants import (
     MAX_WINDOW_WIDTH,
@@ -14,6 +14,7 @@ from progetto_grande.textures import (
     TEXTURE_BUSH,
     ANIMATION_PLAYER_IDLE_DOWN,
     ANIMATION_CRYSTAL,
+    ANIMATION_SPINNER,
 )
 
 def grid_to_pixels(i: int) -> int:
@@ -34,6 +35,10 @@ class GameView(arcade.View):
     crystals: Final[arcade.SpriteList[arcade.TextureAnimationSprite]]
     physics_engine: Final[arcade.PhysicsEngineSimple]
     camera: Final[arcade.Camera2D]
+
+    spinner_list: Final[arcade.SpriteList[arcade.TextureAnimationSprite]]
+    spinner_info: list[tuple[arcade.TextureAnimationSprite, int, int, int, SpinnerMove]]
+
 
     def __init__(self, game_map: Map) -> None:
         super().__init__()
@@ -70,6 +75,9 @@ class GameView(arcade.View):
         self.walls = arcade.SpriteList(use_spatial_hash=True)
         self.crystals = arcade.SpriteList(use_spatial_hash=True)
 
+        self.spinner_list = arcade.SpriteList()
+        self.spinner_info = []
+
         for y in range(self.map.height):
             for x in range(self.map.width):
                 self.grounds.append(
@@ -101,6 +109,19 @@ class GameView(arcade.View):
                     )
                     self.crystals.append(crystal)
 
+        for spinner in self.map.spinners:
+            sprite =arcade.TextureAnimationSprite(animation=ANIMATION_SPINNER,
+            scale= SCALE,
+            center_x= grid_to_pixels(spinner.x),
+            center_y= grid_to_pixels(spinner.y)
+            )
+            min_limit, max_limit = limites_spinner(self.map, spinner)
+            self.spinner_list.append(sprite)
+            self.spinner_info.append(
+                (sprite, 1, min_limit, max_limit, spinner.move)
+            )
+
+
         # Physics engine (player collides with walls)
         self.physics_engine = arcade.PhysicsEngineSimple(self.player, self.walls)
         self.camera = arcade.camera.Camera2D()
@@ -120,6 +141,8 @@ class GameView(arcade.View):
             self.walls.draw()
             self.crystals.draw()
             self.player_list.draw()
+
+            self.spinner_list.draw()
 
     def on_key_press(self, symbol: int, modifiers: int) -> None:
         match symbol:
@@ -194,3 +217,42 @@ class GameView(arcade.View):
         for c in hit_crystals:
             c.remove_from_sprite_lists()
             arcade.play_sound(self.collect_sound)
+
+        #mouvement des spinners
+        new_spinner_info = []
+        for sprite, move, min_limit, max_limit,spinner_move in self.spinner_info :
+            if spinner_move == SpinnerMove.HORIZONTAL:
+                sprite.center_x += 3 * move
+                left_px = grid_to_pixels(min_limit)
+                right_px = grid_to_pixels(max_limit)
+
+                if sprite.center_x >= right_px:
+                    sprite.center_x = right_px
+                    move = -1
+                elif sprite.center_x <= left_px:
+                    sprite.center_x = left_px
+                    move = 1
+            else:
+                sprite.center_y += 3 * move
+
+                bottom_px= grid_to_pixels(min_limit)
+                top_px = grid_to_pixels(max_limit)
+
+                if sprite.center_y >= top_px :
+                    sprite.center_y = top_px
+                    move = -1
+                elif sprite.center_y <= bottom_px :
+                    sprite.center_y = bottom_px
+                    move = 1
+
+            new_spinner_info.append(
+                (sprite, move, min_limit, max_limit, spinner_move)
+            )
+        self.spinner_info =new_spinner_info
+        self.spinner_list.update_animation()
+
+        #contact entre joueur
+
+        if arcade.check_for_collision_with_list(self.player, self.spinner_list):
+            restart = GameView(self.map)
+            self.window.show_view(restart)

@@ -94,3 +94,14 @@ Temps: ~20 min
 - Création du dossier `maps`
 - Ajout du fichier `maps/map1.txt`
 - Analyse du format du fichier de carte
+
+### Suite et fin de la section "Charger la map depuis un fichier" sans spinner (Enzo)
+Temps: ~ 1h 30 min
+
+- implementation de plusieurs fonctions de pour decouper le travail
+
+### Spinner
+Temps: ~2h30 min
+
+- implementation de la classe spinner, fontion pour calculer les limites dans Map
+- desinner, bouger les spinners avec des listes dans Gameview
