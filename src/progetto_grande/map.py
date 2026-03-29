@@ -8,6 +8,7 @@ class GridCell(Enum):
     GRASS = 0
     BUSH = 1
     CRYSTAL = 2
+    HOLE = 3
 
 class SpinnerMove(Enum):
     HORIZONTAL = 3
@@ -92,7 +93,7 @@ MAP_DECOUVERTE = Map(
 # 's' -> spinner horizontal (géré plus tard)
 # 'S' -> spinner vertical (géré plus tard)
 # 'P' -> position de départ du joueur
-
+# 'O' -> HOLE
 
 
 def ligne_taille_en_entier (l: str, key_attendu: str) -> int:
@@ -124,6 +125,8 @@ def caract_en_cell (c: str) -> GridCell :
         return GridCell.BUSH
      if c == "*":
         return GridCell.CRYSTAL
+     if c == "O":
+        return GridCell.HOLE
 
      raise InvalidMapFileException (f"Le caractere {c} n'est pas valide")
 

@@ -104,4 +104,26 @@ Temps: ~ 1h 30 min
 Temps: ~2h30 min
 
 - implementation de la classe spinner, fontion pour calculer les limites dans Map
-- desinner, bouger les spinners avec des listes dans Gameview
+- dessiner, bouger les spinners avec des listes dans Gameview
+
+## SEMAINE 3 : Trous et boomerang
+
+### creation classe Player et Direction (Enzo)
+Temps: 30min
+
+- implementer Player qui herite de arcade.TextureAnimation et refactoriser GameView pour l'alleger  sans grand "changement" dans un nouveau module : player
+- implementer Direction pour les differentes orientation du joueur dans le module player
+
+### Afficher Score (Enzo)
+Temps : 45min
+
+- completer GameView et utiliser les fonctionnalites de Arcade pour afficher en bas a gauche le Score (nombre de crystaux collectes)
+
+### Boomerang (Enzo)
+Temps: 3h
+
+- nouveau module : boomerang avec une classe Boomerang
+- implementer une classe BoomerangState dans ce module
+- ameliorer la GameView
+
+## SEMAINE 4: Epee et Chauve-Souris

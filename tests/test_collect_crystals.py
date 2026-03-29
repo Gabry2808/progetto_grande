@@ -6,7 +6,7 @@ def test_collect_crystals(window: arcade.Window) -> None:
     view = GameView(MAP_DECOUVERTE)
     window.show_view(view)
 
-    INITIAL_CRYSTAL_COUNT = 3
+    INITIAL_CRYSTAL_COUNT = 12
     assert len(view.crystals) == INITIAL_CRYSTAL_COUNT
 
     # Start moving right
