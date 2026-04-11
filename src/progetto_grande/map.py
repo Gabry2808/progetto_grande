@@ -1,5 +1,4 @@
 from tkinter import HORIZONTAL
-from arcade.examples.happy_face import height
 import signal
 from enum import Enum
 from typing import Final
@@ -31,6 +30,7 @@ class Map:
     player_start_y: int,
 
     spinners : list[Spinner],
+    bats: list[tuple[int, int]],
 
 ) -> None:
         self.width: Final[int] = width
@@ -40,6 +40,7 @@ class Map:
         self._grid: Final[list[list[GridCell]]] = grid
 
         self.spinners: Final[list[Spinner]]= spinners
+        self.bats: Final[list[tuple[int, int]]] = bats
 
     def get(self, x: int, y: int) -> GridCell:
         if x < 0 or x >= self.width:
@@ -119,7 +120,7 @@ def ligne_taille_en_entier (l: str, key_attendu: str) -> int:
 
 def caract_en_cell (c: str) -> GridCell :
      "transforme un caractere du fichier en grid et leve les exceptions"
-     if (c == " " ) or (c== "P") or (c=="s") or (c== "S") :
+     if (c == " " ) or (c== "P") or (c=="s") or (c== "S") or (c == "v"):
         return GridCell.GRASS
      if c == "x":
         return GridCell.BUSH
@@ -159,6 +160,7 @@ def charger_map (lignes: list[str]) -> Map:
 
      new_spinners: list[Spinner]
      new_spinners = []
+     new_bats: list[tuple[int, int]] = []
 
      for num_ligne_fichier, ligne in enumerate(map_lignes):
         if len(ligne)>new_width:
@@ -179,7 +181,8 @@ def charger_map (lignes: list[str]) -> Map:
                 new_spinners.append(Spinner(x,y, SpinnerMove.HORIZONTAL))
             if char == "S":
                 new_spinners.append(Spinner(x,y, SpinnerMove.VERTICAL))
-
+            if char == "v":
+                new_bats.append((x, y))
             row.append(caract_en_cell(char))
 
         new_grid.append(row)
@@ -188,7 +191,15 @@ def charger_map (lignes: list[str]) -> Map:
      if new_player_start_x == -1 :
         raise InvalidMapFileException("Joueur hors map")
 
-     return Map( new_width, new_height , new_grid, new_player_start_x, new_player_start_y , new_spinners )
+     return Map(
+        new_width,
+        new_height,
+        new_grid,
+        new_player_start_x,
+        new_player_start_y,
+        new_spinners,
+        new_bats,
+    )
 
 def charger_map_dun_fichier( nom_fichier: str) -> Map :
     try:

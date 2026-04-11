@@ -5,7 +5,9 @@ from progetto_grande.map import Map, GridCell, SpinnerMove, limites_spinner
 
 from progetto_grande.player import Player, Direction
 
-from progetto_grande.boomerang import Boomerang, BoomerangState
+from progetto_grande.Weapons.boomerang import Boomerang, BoomerangState
+from progetto_grande.Weapons.sword import Sword
+from progetto_grande.Monsters.bat import Bat
 
 from progetto_grande.constants import (
     MAX_WINDOW_WIDTH,
@@ -25,6 +27,7 @@ from progetto_grande.textures import (
     ANIMATION_SPINNER,
     TEXTURE_HOLE,
     ANIMATION_BOOMERANG,
+    ANIMATION_BAT
 )
 
 def grid_to_pixels(i: int) -> int:
@@ -75,13 +78,28 @@ class GameView(arcade.View):
         self.player_list = arcade.SpriteList()
         self.player_list.append(self.player)
 
-        #creer boomerang
+        #------------Weapons------------
+        #Boomerang
         self.boomerang = Boomerang(
             animation=ANIMATION_BOOMERANG,
             scale=SCALE,
             )
         self.boomerang_list = arcade.SpriteList()
         self.boomerang_list.append(self.boomerang)
+        self.active_weapon = self.boomerang
+        # Weapon icons
+        self.boomerang_icon_texture = arcade.load_texture("assets/provided/boomerang-sheet.png")
+        self.sword_icon_texture = arcade.load_texture("assets/provided/boomerang-sheet.png")
+        self.weapon_icon_list = arcade.SpriteList()
+        self.weapon_icon: arcade.Sprite = arcade.Sprite(
+            self.boomerang_icon_texture,
+            scale=0.8,
+        )
+        self.weapon_icon_list.append(self.weapon_icon)
+        #Sword
+        self.sword = Sword(scale=SCALE)
+        self.sword_list = arcade.SpriteList()
+        self.sword_list.append(self.sword)
 
         # World sprite lists
         self.grounds = arcade.SpriteList(use_spatial_hash=True)
@@ -144,6 +162,17 @@ class GameView(arcade.View):
             self.spinner_info.append(
                 (sprite, 1, min_limit, max_limit, spinner.move)
             )
+        #---------bats---------
+        self.bat_list = arcade.SpriteList()
+        for x, y in self.map.bats:
+            bat = Bat(
+                animation=ANIMATION_BAT,
+                scale=SCALE,
+                center_x=grid_to_pixels(x),
+                center_y=grid_to_pixels(y),
+            )
+            self.bat_list.append(bat)
+
 
 
         # Physics engine (player collides with walls)
@@ -166,6 +195,10 @@ class GameView(arcade.View):
         self.window.width = min(MAX_WINDOW_WIDTH, self.world_width)
         self.window.height = min(MAX_WINDOW_HEIGHT, self.world_height)
 
+        self.weapon_icon.center_x = 30
+        self.weapon_icon.center_y = self.window.height - 30
+        self.score_text.y = self.window.height - 40
+
     def on_draw(self) -> None:
         self.clear()
 
@@ -177,19 +210,39 @@ class GameView(arcade.View):
             self.player_list.draw()
 
             self.spinner_list.draw()
+            self.bat_list.draw()
 
             self.boomerang_list.draw()
+            self.sword_list.draw()
 
         with self.ui_camera.activate():
             self.score_text.draw()
+            self.weapon_icon_list.draw()
+
+            weapon_name = "boomerang" if self.active_weapon == self.boomerang else "sword"
+            arcade.draw_text(
+                f"Weapon: {weapon_name}",
+                20,
+                self.window.height - 80,
+                arcade.color.WHITE,
+                12,
+            )
+
+    def update_weapon_icon(self) -> None:
+        if self.active_weapon == self.boomerang:
+            self.weapon_icon.texture = self.boomerang_icon_texture
+        else:
+            self.weapon_icon.texture = self.sword_icon_texture
 
     def on_key_press(self, symbol: int, modifiers: int) -> None:
         if symbol == arcade.key.D:
-            self.boomerang.launch(
-                self.player.center_x,
-                self.player.center_y,
-                self.player.direction,
-                )
+            self.active_weapon.use(self.player)
+        elif symbol == arcade.key.R:
+            if self.active_weapon == self.boomerang:
+                    self.active_weapon = self.sword
+            else:
+                self.active_weapon = self.boomerang
+            self.update_weapon_icon()
         else:
             self.player.press_key(symbol)
 
@@ -231,6 +284,12 @@ class GameView(arcade.View):
 
         self.spinner_info = new_spinner_info
 
+    def remove_hit_bats(self, hit_bats: list[arcade.Sprite]) -> None:
+        if not hit_bats:
+            return
+        for bat in hit_bats:
+            bat.remove_from_sprite_lists()
+
     def update_boomerang(self) -> None:
         if self.boomerang.state == BoomerangState.INACTIVE:
             return
@@ -247,12 +306,21 @@ class GameView(arcade.View):
             if hit_spinners:
                 self.boomerang.start_return()
 
+            hit_bats = arcade.check_for_collision_with_list(self.boomerang, self.bat_list)
+            self.remove_hit_bats(hit_bats)
+
+            if hit_bats:
+                self.boomerang.start_return()
+
             if self.boomerang.too_far():
                 self.boomerang.start_return()
 
         elif self.boomerang.state == BoomerangState.RETURNING:
             hit_spinners = arcade.check_for_collision_with_list(self.boomerang, self.spinner_list)
             self.remove_hit_spinners(hit_spinners)
+
+            hit_bats = arcade.check_for_collision_with_list(self.boomerang, self.bat_list)
+            self.remove_hit_bats(hit_bats)
 
             self.boomerang.update_returning(
                 self.player.center_x,
@@ -268,8 +336,17 @@ class GameView(arcade.View):
         self.update_player_animation()
         # Physics
         self.physics_engine.update()
-        # maj boomerang
+        # Weapon
         self.update_boomerang()
+        self.sword.update_sword()
+        if self.sword.active:
+            hit_bats = arcade.check_for_collision_with_list(self.sword, self.bat_list)
+            self.remove_hit_bats(hit_bats)
+            hit_crystals = arcade.check_for_collision_with_list(self.sword, self.crystals)
+            for crystal in hit_crystals:
+                crystal.remove_from_sprite_lists()
+                arcade.play_sound(self.collect_sound)
+                self.score += 1
         # Update animations
         self.player.update_animation()
         self.crystals.update_animation()
@@ -311,6 +388,8 @@ class GameView(arcade.View):
             arcade.play_sound(self.collect_sound)
             self.score += 1
         self.score_text.text = f"SCORE : {self.score}"
+
+        #------------Monsters------------
         #mouvement des spinners
         new_spinner_info = []
         for sprite, move, min_limit, max_limit,spinner_move in self.spinner_info :
@@ -343,10 +422,14 @@ class GameView(arcade.View):
             )
         self.spinner_info =new_spinner_info
         self.spinner_list.update_animation()
-
-        #contact entre joueur et spinner
-
-        if arcade.check_for_collision_with_list(self.player, self.spinner_list) :
+        #bats
+        for bat in self.bat_list:
+            bat.update_bat()
+        #contact entre joueur et monstres
+        if (
+            arcade.check_for_collision_with_list(self.player, self.bat_list)
+            or arcade.check_for_collision_with_list(self.player, self.spinner_list)
+        ):
             game_over = GameView(self.map)
             self.window.show_view(game_over)
 

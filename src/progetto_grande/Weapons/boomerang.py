@@ -69,3 +69,10 @@ class Boomerang(arcade.TextureAnimationSprite):
 
         self.center_x += 8 * dx / distance
         self.center_y += 8 * dy / distance
+
+    def use(self, player) -> None:
+        self.launch(
+            player.center_x,
+            player.center_y,
+            player.direction,
+        )

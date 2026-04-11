@@ -68,8 +68,6 @@ class Player(arcade.TextureAnimationSprite):
         elif self.go_right:
             self.direction = Direction.EAST
 
-
-
     def update_movement(self) -> None:
         self.change_x = 0
         self.change_y = 0

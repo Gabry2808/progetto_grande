@@ -58,8 +58,41 @@ ANIMATION_SPINNER: Final[arcade. TextureAnimation]= _load_animation_strip(
     3,
 )
 
+ANIMATION_BAT: Final[arcade. TextureAnimation]= _load_animation_strip(
+    "assets/Top_Down_Adventure_Pack_v.1.0/Enemies_Sprites/Pinkbat_Sprites/pinkbat_idle_left_anim_strip_5.png" ,
+    5,
+)
+
 ANIMATION_BOOMERANG= _load_animation_strip(
     "assets/provided/boomerang-sheet.png",
     8,
     25,
+)
+
+ANIMATION_SWORD_DOWN: Final[arcade.TextureAnimation] = _load_animation_strip(
+    "assets/Top_Down_Adventure_Pack_v.1.0/Char_Sprites/char_attack48_down_anim_strip_6.png",
+    6,
+    50,
+    tile_size=(48, 48),
+)
+
+ANIMATION_SWORD_UP: Final[arcade.TextureAnimation] = _load_animation_strip(
+    "assets/Top_Down_Adventure_Pack_v.1.0/Char_Sprites/char_attack48_up_anim_strip_6.png",
+    6,
+    50,
+    tile_size=(48, 48),
+)
+
+ANIMATION_SWORD_LEFT: Final[arcade.TextureAnimation] = _load_animation_strip(
+    "assets/Top_Down_Adventure_Pack_v.1.0/Char_Sprites/char_attack48_left_anim_strip_6.png",
+    6,
+    50,
+    tile_size=(48, 48),
+)
+
+ANIMATION_SWORD_RIGHT: Final[arcade.TextureAnimation] = _load_animation_strip(
+    "assets/Top_Down_Adventure_Pack_v.1.0/Char_Sprites/char_attack48_right_anim_strip_6.png",
+    6,
+    50,
+    tile_size=(48, 48),
 )
