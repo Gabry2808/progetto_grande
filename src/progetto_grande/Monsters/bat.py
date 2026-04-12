@@ -4,7 +4,7 @@ import random
 
 
 class Bat(arcade.TextureAnimationSprite):
-    def __init__(self, animation, scale: float, center_x: float, center_y: float) -> None:
+    def __init__(self, animation: arcade.TextureAnimation, scale: float, center_x: float, center_y: float) -> None:
         super().__init__(
             animation=animation,
             scale=scale,

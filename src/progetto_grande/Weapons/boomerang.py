@@ -1,9 +1,11 @@
 from enum import Enum
 
 import arcade
-
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from progetto_grande.gameview import GameView
 from progetto_grande.constants import TILE_SIZE
-from progetto_grande.player import Direction
+from progetto_grande.player import Direction, Player
 
 
 class BoomerangState(Enum):
@@ -14,7 +16,7 @@ class BoomerangState(Enum):
 
 class Boomerang(arcade.TextureAnimationSprite):
 
-    def __init__(self, animation, scale: float) -> None:
+    def __init__(self, animation:  arcade.TextureAnimation, scale: float) -> None:
         super().__init__(
             animation=animation,
             scale=scale,
@@ -27,6 +29,7 @@ class Boomerang(arcade.TextureAnimationSprite):
         self.start_x = 0
         self.start_y = 0
         self.visible = False
+        self.name = "boomerang"
 
     def launch(self, player_x: float, player_y: float, direction: Direction) -> None:
         if self.state != BoomerangState.INACTIVE:
@@ -70,7 +73,7 @@ class Boomerang(arcade.TextureAnimationSprite):
         self.center_x += 8 * dx / distance
         self.center_y += 8 * dy / distance
 
-    def use(self, player) -> None:
+    def use(self, player: Player) -> None:
         self.launch(
             player.center_x,
             player.center_y,

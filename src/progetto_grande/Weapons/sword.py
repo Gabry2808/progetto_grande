@@ -1,5 +1,5 @@
 import arcade
-from progetto_grande.player import Direction
+from progetto_grande.player import Direction, Player
 from progetto_grande.textures import (
     ANIMATION_SWORD_DOWN,
     ANIMATION_SWORD_UP,
@@ -13,6 +13,7 @@ class Sword(arcade.TextureAnimationSprite):
         self.active = False
         self.visible = False
         self.frame_count = 0
+        self.name = "sword"
 
     def start(self, x: float, y: float, direction: Direction) -> None:
         self.center_x = x
@@ -43,7 +44,7 @@ class Sword(arcade.TextureAnimationSprite):
             self.active = False
             self.visible = False
 
-    def use(self, player):
+    def use(self, player: Player) -> None:
         if not self.active:
             self.start(
                 player.center_x,

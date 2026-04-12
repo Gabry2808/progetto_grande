@@ -14,7 +14,7 @@ class Direction(Enum):
 
 class Player(arcade.TextureAnimationSprite):
 
-    def __init__(self, animation, scale: float, center_x: float, center_y: float) -> None:
+    def __init__(self, animation: arcade.TextureAnimation , scale: float, center_x: float, center_y: float) -> None:
         super().__init__(
             animation=animation,
             scale=scale,
@@ -28,18 +28,23 @@ class Player(arcade.TextureAnimationSprite):
 
         # direction debut
         self.direction = Direction.SOUTH
+        self.last_horizontal = 0   # right = 1, left = -1
+        self.last_vertical = 0     # up = 1, down = -1
 
     def press_key(self, symbol: int) -> None:
         match symbol:
             case arcade.key.RIGHT:
                 self.go_right = True
+                self.last_horizontal = 1
             case arcade.key.LEFT:
                 self.go_left = True
+                self.last_horizontal = -1
             case arcade.key.UP:
                 self.go_up = True
+                self.last_vertical = 1
             case arcade.key.DOWN:
                 self.go_down = True
-
+                self.last_vertical = -1
         self.update_direction()
 
     def release_key(self, symbol: int) -> None:
@@ -69,15 +74,22 @@ class Player(arcade.TextureAnimationSprite):
             self.direction = Direction.EAST
 
     def update_movement(self) -> None:
-        self.change_x = 0
-        self.change_y = 0
-
-        if self.go_right and not self.go_left:
+        # horizontal movement
+        if self.go_right and self.go_left:
+            self.change_x = self.last_horizontal * PLAYER_MOVEMENT_SPEED
+        elif self.go_right:
             self.change_x = PLAYER_MOVEMENT_SPEED
-        elif self.go_left and not self.go_right:
+        elif self.go_left:
             self.change_x = -PLAYER_MOVEMENT_SPEED
+        else:
+            self.change_x = 0
 
-        if self.go_up and not self.go_down:
+        # vertical movement
+        if self.go_up and self.go_down:
+            self.change_y = self.last_vertical * PLAYER_MOVEMENT_SPEED
+        elif self.go_up:
             self.change_y = PLAYER_MOVEMENT_SPEED
-        elif self.go_down and not self.go_up:
+        elif self.go_down:
             self.change_y = -PLAYER_MOVEMENT_SPEED
+        else:
+            self.change_y = 0

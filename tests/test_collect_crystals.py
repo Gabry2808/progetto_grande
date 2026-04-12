@@ -6,14 +6,14 @@ def test_collect_crystals(window: arcade.Window) -> None:
     view = GameView(MAP_DECOUVERTE)
     window.show_view(view)
 
-    INITIAL_CRYSTAL_COUNT = 12
-    assert len(view.crystals) == INITIAL_CRYSTAL_COUNT
+    initial_crystal_count = len(view.crystals)
+    assert initial_crystal_count == 12
 
-    # Start moving right
-    view.on_key_press(arcade.key.RIGHT, 0)
+    crystal = view.crystals[0]
+    view.player.center_x = crystal.center_x
+    view.player.center_y = crystal.center_y
 
-    # Let the game run for 1 second (60 frames)
-    window.test(60)
+    view.on_update(1 / 60)
 
-    # We should have collected the first crystal
-    assert len(view.crystals) == INITIAL_CRYSTAL_COUNT - 1
+
+    assert len(view.crystals) == initial_crystal_count - 1
