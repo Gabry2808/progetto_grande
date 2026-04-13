@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from progetto_grande.gameview import GameView
 from progetto_grande.constants import TILE_SIZE
 from progetto_grande.player import Direction, Player
-
+from progetto_grande.Weapons.weapon import Weapon
 
 class BoomerangState(Enum):
     INACTIVE = 1
@@ -14,7 +14,7 @@ class BoomerangState(Enum):
     RETURNING = 3
 
 
-class Boomerang(arcade.TextureAnimationSprite):
+class Boomerang(Weapon):
 
     def __init__(self, animation:  arcade.TextureAnimation, scale: float) -> None:
         super().__init__(
@@ -79,3 +79,5 @@ class Boomerang(arcade.TextureAnimationSprite):
             player.center_y,
             player.direction,
         )
+    def is_active(self) -> bool:
+        return self.state != BoomerangState.INACTIVE

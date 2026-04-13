@@ -1,9 +1,9 @@
 import arcade
 import math
 import random
+from progetto_grande.Monsters.monster import Monster
 
-
-class Bat(arcade.TextureAnimationSprite):
+class Bat(Monster):
     def __init__(self, animation: arcade.TextureAnimation, scale: float, center_x: float, center_y: float) -> None:
         super().__init__(
             animation=animation,

@@ -1,5 +1,6 @@
 import arcade
 from progetto_grande.player import Direction, Player
+from progetto_grande.Weapons.weapon import Weapon
 from progetto_grande.textures import (
     ANIMATION_SWORD_DOWN,
     ANIMATION_SWORD_UP,
@@ -7,7 +8,7 @@ from progetto_grande.textures import (
     ANIMATION_SWORD_RIGHT,
 )
 
-class Sword(arcade.TextureAnimationSprite):
+class Sword(Weapon):
     def __init__(self, scale: float) -> None:
         super().__init__(animation=ANIMATION_SWORD_DOWN, scale=scale)
         self.active = False
@@ -51,3 +52,5 @@ class Sword(arcade.TextureAnimationSprite):
                 player.center_y,
                 player.direction,
             )
+    def is_active(self) -> bool:
+        return self.active
