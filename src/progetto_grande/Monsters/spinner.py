@@ -2,10 +2,11 @@ from typing import Callable
 import arcade
 
 from progetto_grande.Monsters.monster import Monster
-from progetto_grande.map import SpinnerMove
+from progetto_grande.map import Map, SpinnerMove, limites_spinner
 from progetto_grande.textures import ANIMATION_SPINNER
 from progetto_grande.constants import SCALE
 
+SpinnerList = arcade.SpriteList["Spinner"]
 
 class Spinner(Monster):
     def __init__(
@@ -51,3 +52,6 @@ class Spinner(Monster):
             elif self.center_y <= bottom_px:
                 self.center_y = bottom_px
                 self.move = 1
+
+    def update_monster(self, grid_to_pixels: Callable[[int], int]) -> None:
+        self.update_spinner(grid_to_pixels)

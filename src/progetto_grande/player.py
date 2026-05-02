@@ -3,7 +3,13 @@ from enum import Enum
 import arcade
 
 from progetto_grande.constants import PLAYER_MOVEMENT_SPEED
-
+from progetto_grande.textures import (
+    ANIMATION_PLAYER_IDLE_DOWN,
+    ANIMATION_PLAYER_IDLE_UP,
+    ANIMATION_PLAYER_IDLE_LEFT,
+    ANIMATION_PLAYER_IDLE_RIGHT,
+    ANIMATION_BAT
+)
 
 class Direction(Enum):
     NORTH = 1
@@ -11,6 +17,12 @@ class Direction(Enum):
     EAST = 3
     WEST = 4
 
+PLAYER_IDLE_ANIMATIONS = {
+    Direction.SOUTH: ANIMATION_PLAYER_IDLE_DOWN,
+    Direction.NORTH: ANIMATION_PLAYER_IDLE_UP,
+    Direction.WEST: ANIMATION_PLAYER_IDLE_LEFT,
+    Direction.EAST: ANIMATION_PLAYER_IDLE_RIGHT,
+}
 
 class Player(arcade.TextureAnimationSprite):
 
@@ -93,3 +105,9 @@ class Player(arcade.TextureAnimationSprite):
             self.change_y = -PLAYER_MOVEMENT_SPEED
         else:
             self.change_y = 0
+
+    def update_animation_state(self) -> None:
+        new_animation = PLAYER_IDLE_ANIMATIONS[self.direction]
+
+        if self.animation != new_animation:
+            self.animation = new_animation

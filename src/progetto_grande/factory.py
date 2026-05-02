@@ -56,13 +56,13 @@ def create_sword_list(sword: Sword) -> SpriteList:
     return sword_list
 
 def create_spinner_list(
-    game_map: Map,
+    map: Map,
     grid_to_pixels: Callable[[int], int],
 ) -> SpinnerList:
     spinner_list: SpinnerList = arcade.SpriteList()
 
-    for spinner in game_map.spinners:
-        min_limit, max_limit = limites_spinner(game_map, spinner)
+    for spinner in map.spinners:
+        min_limit, max_limit = limites_spinner(map, spinner)
         spinner_sprite = Spinner(
             center_x=grid_to_pixels(spinner.x),
             center_y=grid_to_pixels(spinner.y),
@@ -75,12 +75,12 @@ def create_spinner_list(
     return spinner_list
 
 def create_bat_list(
-    game_map: Map,
+    map: Map,
     grid_to_pixels: Callable[[int], int],
 ) -> BatList:
     bat_list: BatList = arcade.SpriteList()
 
-    for x, y in game_map.bats:
+    for x, y in map.bats:
         bat = Bat(
             animation=ANIMATION_BAT,
             scale=SCALE,
