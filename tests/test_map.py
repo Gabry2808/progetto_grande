@@ -1,7 +1,5 @@
 import pytest
-
 from progetto_grande.map import GridCell, MAP_DECOUVERTE, InvalidMapFileException, charger_map
-
 
 def test_map_requires_player() -> None:
     lines = [
@@ -48,7 +46,7 @@ def test_map_reads_main_symbols() -> None:
     assert game_map.get(2, 1) == GridCell.HOLE
     assert game_map.player_start_x == 2
     assert game_map.player_start_y == 0
-    assert game_map.bats == [(3, 1)]
+    assert game_map.bats == ((3, 1),)
 
 def test_map_get_returns_correct_cells() -> None:
     assert MAP_DECOUVERTE.get(0, 0) == GridCell.BUSH
@@ -56,6 +54,24 @@ def test_map_get_returns_correct_cells() -> None:
     assert MAP_DECOUVERTE.get(10, 1) == GridCell.CRYSTAL
     assert MAP_DECOUVERTE.get(3, 1) == GridCell.GRASS
 
+def test_map_is_walkable() -> None:
+    lines = [
+        "width: 5",
+        "height: 3",
+        "---",
+        "x*  x",
+        "x Ovx",
+        "x P x",
+        "---",
+    ]
+    game_map = charger_map(lines)
+
+    assert game_map.is_walkable((1, 0))  # grass
+    assert game_map.is_walkable((2, 0))  # player cell = grass
+    assert not game_map.is_walkable((0, 0))  # bush
+    assert not game_map.is_walkable((2, 1))  # hole
+    assert not game_map.is_walkable((-1, 0))  # hors map
+    assert not game_map.is_walkable((5, 0))  # hors map
 
 def test_map_get_invalid_coordinates() -> None:
     with pytest.raises(IndexError):

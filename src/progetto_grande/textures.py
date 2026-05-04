@@ -63,6 +63,11 @@ ANIMATION_BAT: Final[arcade. TextureAnimation]= _load_animation_strip(
     5,
 )
 
+ANIMATION_BLOB: Final[arcade.TextureAnimation] = _load_animation_strip(
+    "assets/Top_Down_Adventure_Pack_v.1.0/Enemies_Sprites/Pinkslime_Sprites/pinkslime_idle_anim_all_dir_strip_6.png",
+    6,
+)
+
 ANIMATION_BOOMERANG= _load_animation_strip(
     "assets/provided/boomerang-sheet.png",
     8,

@@ -10,6 +10,7 @@ from progetto_grande.Weapons.boomerang import Boomerang, BoomerangState
 from progetto_grande.Weapons.weapon import Weapon
 from progetto_grande.Weapons.sword import Sword
 from progetto_grande.Monsters.bat import Bat
+from progetto_grande.Monsters.blob import Blob
 from progetto_grande.Monsters.spinner import Spinner
 from progetto_grande.Monsters.monster import Monster
 from progetto_grande.world import create_world_sprites
@@ -27,6 +28,7 @@ from progetto_grande.factory import (
     create_spinner_list,
     create_sword,
     create_sword_list,
+    create_blob_list
 )
 
 from progetto_grande.constants import (
@@ -39,6 +41,7 @@ SpinnerList = arcade.SpriteList[Spinner]
 SpriteList = arcade.SpriteList[arcade.Sprite]
 AnimatedSpriteList = arcade.SpriteList[arcade.TextureAnimationSprite]
 BatList = arcade.SpriteList[Bat]
+BlobList = arcade.SpriteList[Blob]
 
 def grid_to_pixels(i: int) -> int:
     return i * TILE_SIZE + (TILE_SIZE // 2)
@@ -70,6 +73,7 @@ class GameView(arcade.View):
     ui_camera: Camera2D
 
     bat_list: BatList
+    blob_list: BlobList
     holes: Final[SpriteList]
 
     def __init__(self, game_map: Map) -> None:
@@ -108,6 +112,12 @@ class GameView(arcade.View):
         )
         self.spinner_list = create_spinner_list(self.map, grid_to_pixels)
         self.bat_list = create_bat_list(self.map, grid_to_pixels)
+        self.blob_list = create_blob_list(
+            self.map,
+            grid_to_pixels,
+            self.player,
+            self.walls,
+        )
 
         # Physics engine (player collides with walls)
         self.physics_engine = arcade.PhysicsEngineSimple(self.player, self.walls)
@@ -146,6 +156,7 @@ class GameView(arcade.View):
 
             self.spinner_list.draw()
             self.bat_list.draw()
+            self.blob_list.draw()
 
             self.boomerang_list.draw()
             self.sword_list.draw()
@@ -309,6 +320,7 @@ class GameView(arcade.View):
     def all_monsters(self) -> Iterator[Monster]:
         yield from self.spinner_list
         yield from self.bat_list
+        yield from self.blob_list
 
     def player_touches_monster(self) -> bool:
         #On vérifie si le joueur est en contact avec un monstre

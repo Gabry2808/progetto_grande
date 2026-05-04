@@ -4,10 +4,12 @@ import arcade
 from progetto_grande.constants import SCALE
 from progetto_grande.map import Map, limites_spinner
 from progetto_grande.Monsters.bat import Bat
+from progetto_grande.Monsters.blob import Blob
 from progetto_grande.Monsters.spinner import Spinner
 from progetto_grande.player import Player
 from progetto_grande.textures import (
     ANIMATION_BAT,
+    ANIMATION_BLOB,
     ANIMATION_BOOMERANG,
     ANIMATION_PLAYER_IDLE_DOWN,
 )
@@ -17,7 +19,7 @@ from progetto_grande.Weapons.sword import Sword
 SpriteList = arcade.SpriteList[arcade.Sprite]
 BatList = arcade.SpriteList[Bat]
 SpinnerList = arcade.SpriteList[Spinner]
-
+BlobList = arcade.SpriteList[Blob]
 
 def create_player(
     game_map: Map,
@@ -34,7 +36,6 @@ def create_player_list(player: Player) -> SpriteList:
     player_list: SpriteList = arcade.SpriteList()
     player_list.append(player)
     return player_list
-
 
 def create_boomerang() -> Boomerang:
     return Boomerang(
@@ -90,3 +91,25 @@ def create_bat_list(
         bat_list.append(bat)
 
     return bat_list
+
+def create_blob_list(
+    game_map: Map,
+    grid_to_pixels: Callable[[int], int],
+    player: Player,
+    walls: arcade.SpriteList[arcade.Sprite],
+) -> BlobList:
+
+    blob_list: BlobList = arcade.SpriteList()
+    for x, y in game_map.blobs:
+        blob = Blob(
+            animation=ANIMATION_BLOB,
+            scale=SCALE,
+            center_x=grid_to_pixels(x),
+            center_y=grid_to_pixels(y),
+            game_map = game_map,
+            player = player,
+            walls = walls,
+        )
+        blob_list.append(blob)
+
+    return blob_list

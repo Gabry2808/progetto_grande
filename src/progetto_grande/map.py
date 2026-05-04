@@ -1,4 +1,5 @@
 from tkinter import HORIZONTAL
+import networkx as nx
 import signal
 from enum import Enum
 from typing import Final
@@ -25,22 +26,25 @@ class Map:
     self,
     width: int,
     height: int,
-    grid: list[list[GridCell]],
+    grid: tuple[tuple[GridCell, ...], ...],
     player_start_x: int,
     player_start_y: int,
 
     spinners : list[Spinner],
-    bats: list[tuple[int, int]],
+    bats: tuple[tuple[int, int], ...],
+    blobs: tuple[tuple[int, int], ...]
 
 ) -> None:
         self.width: Final[int] = width
         self.height: Final[int] = height
         self.player_start_x: Final[int] = player_start_x
         self.player_start_y: Final[int] = player_start_y
-        self._grid: Final[list[list[GridCell]]] = grid
+        self._grid: tuple[tuple[GridCell, ...], ...] = grid
 
         self.spinners: Final[list[Spinner]]= spinners
-        self.bats: Final[list[tuple[int, int]]] = bats
+        self.bats: tuple[tuple[int, int], ...] = bats
+        self.blobs: tuple[tuple[int, int], ...] = blobs
+        self.navmesh: nx.Graph[tuple[int, int]] | None = None
 
     def get(self, x: int, y: int) -> GridCell:
         if x < 0 or x >= self.width:
@@ -49,6 +53,14 @@ class Map:
             raise IndexError("y out of bounds")
 
         return self._grid[y][x]
+
+    def is_walkable(self, cell: tuple[int, int]) -> bool:
+        x, y = cell
+
+        if not (0 <= x < self.width and 0 <= y < self.height):
+            return False
+
+        return self.get(x, y) not in (GridCell.BUSH, GridCell.HOLE)
 
 # Exception utilisée lorsque le fichier de la carte contient une erreur
 class InvalidMapFileException(Exception):
@@ -118,18 +130,21 @@ def ligne_taille_en_entier (l: str, key_attendu: str) -> int:
      return val
 
 
-def caract_en_cell (c: str) -> GridCell :
-     "transforme un caractere du fichier en grid et leve les exceptions"
-     if (c == " " ) or (c== "P") or (c=="s") or (c== "S") or (c == "v"):
-        return GridCell.GRASS
-     if c == "x":
-        return GridCell.BUSH
-     if c == "*":
-        return GridCell.CRYSTAL
-     if c == "O":
-        return GridCell.HOLE
-
-     raise InvalidMapFileException (f"Le caractere {c} n'est pas valide")
+def caract_en_cell(c: str) -> GridCell:
+    """Transforme un caractère du fichier en GridCell."""
+    match c:
+        case " " | "P" | "s" | "S" | "v" | "B":
+            return GridCell.GRASS
+        case "x":
+            return GridCell.BUSH
+        case "*":
+            return GridCell.CRYSTAL
+        case "O":
+            return GridCell.HOLE
+        case _:
+            raise InvalidMapFileException(
+                f"Le caractère {c} n'est pas valide"
+            )
 
 def charger_map (lignes: list[str]) -> Map:
      "charger la map a partir des LIGNES d'un fichier et lever les exeptions"
@@ -161,6 +176,7 @@ def charger_map (lignes: list[str]) -> Map:
      new_spinners: list[Spinner]
      new_spinners = []
      new_bats: list[tuple[int, int]] = []
+     new_blobs: list[tuple[int, int]] = []
 
      for num_ligne_fichier, ligne in enumerate(map_lignes):
         if len(ligne)>new_width:
@@ -183,6 +199,8 @@ def charger_map (lignes: list[str]) -> Map:
                 new_spinners.append(Spinner(x,y, SpinnerMove.VERTICAL))
             if char == "v":
                 new_bats.append((x, y))
+            if char == "B":
+                new_blobs.append((x, y))
             row.append(caract_en_cell(char))
 
         new_grid.append(row)
@@ -191,15 +209,19 @@ def charger_map (lignes: list[str]) -> Map:
      if new_player_start_x == -1 :
         raise InvalidMapFileException("Joueur hors map")
 
-     return Map(
+     game_map = Map(
         new_width,
         new_height,
-        new_grid,
+        tuple(tuple(row) for row in new_grid),
         new_player_start_x,
         new_player_start_y,
         new_spinners,
-        new_bats,
+        tuple(new_bats),
+        tuple(new_blobs),
     )
+     from progetto_grande.navmesh import build_navmesh
+     game_map.navmesh = build_navmesh(game_map)
+     return game_map
 
 def charger_map_dun_fichier( nom_fichier: str) -> Map :
     try:
