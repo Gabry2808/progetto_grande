@@ -188,19 +188,20 @@ def charger_map (lignes: list[str]) -> Map:
         for x, char in enumerate(ligne_complete) :
             y= new_height - 1 - num_ligne_fichier
 
-            if char == "P":
-                if new_player_start_x != - 1:
-                    raise InvalidMapFileException("Trop de joueurs sur votre map")
-                new_player_start_x = x
-                new_player_start_y = y
-            if char == "s":
-                new_spinners.append(Spinner(x,y, SpinnerMove.HORIZONTAL))
-            if char == "S":
-                new_spinners.append(Spinner(x,y, SpinnerMove.VERTICAL))
-            if char == "v":
-                new_bats.append((x, y))
-            if char == "B":
-                new_blobs.append((x, y))
+            match char:
+                case "P":
+                    if new_player_start_x != -1:
+                        raise InvalidMapFileException("Trop de joueurs sur votre map")
+                    new_player_start_x = x
+                    new_player_start_y = y
+                case "s":
+                    new_spinners.append(Spinner(x, y, SpinnerMove.HORIZONTAL))
+                case "S":
+                    new_spinners.append(Spinner(x, y, SpinnerMove.VERTICAL))
+                case "v":
+                    new_bats.append((x, y))
+                case "B":
+                    new_blobs.append((x, y))
             row.append(caract_en_cell(char))
 
         new_grid.append(row)

@@ -77,9 +77,9 @@ def node_to_position(node: Node) -> Position:
     cell_coords = tuple(n // NODES_PER_CELL for n in node)
     local_coords = tuple(n % NODES_PER_CELL for n in node)
 
-    # - cell_coord * TILE_SIZE → position de l'origine de la cellule
-    # - local_coord * step     → déplacement à l'intérieur de la cellule
-    # - + step / 2             → centre du petit carré, pas son bord
+    # - cell_coord * TILE_SIZE -> position de l'origine de la cellule
+    # - local_coord * step     -> déplacement à l'intérieur de la cellule
+    # - + step / 2             ->  centre du petit carré, pas son bord
     #
     # Donc : position = cell_coord * TILE_SIZE + (local_coord + 0.5) * step
     return tuple(
@@ -92,16 +92,17 @@ def node_to_position(node: Node) -> Position:
 def distance(p1: Position, p2: Position) -> float:
     return math.sqrt((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2)
 
-def distance_between_nodes(node1: Node, node2: Node) -> float:
-    return distance(node_to_position(node1), node_to_position(node2))
+def closest_node(
+    graph: nx.Graph[Node],
+    position: Position,
+) -> Node:
 
-def distance_position_to_node(position: Position, node: Node) -> float:
-    return distance(position, node_to_position(node))
-
-def closest_node(graph: nx.Graph[Node], position: Position) -> Node:
     return min(
         graph.nodes,
-        key=lambda node: distance_position_to_node(position, node),
+        key=lambda node: distance(
+            position,
+            node_to_position(node),
+        ),
     )
 
 # ============= Graph =============
@@ -113,10 +114,6 @@ def forward_neighbor_nodes(node: Node) -> list[Node]:
         (x + 1, y + 1),
         (x + 1, y - 1),
     ]
-
-def is_diagonal_between_cells(cell: Cell, neighbor_cell: Cell) -> bool:
-    return cell[0] != neighbor_cell[0] and cell[1] != neighbor_cell[1]
-
 def adjacent_cells_for_diagonal(cell: Cell, neighbor_cell: Cell) -> tuple[Cell, Cell]:
     dx = neighbor_cell[0] - cell[0]
     dy = neighbor_cell[1] - cell[1]
@@ -131,7 +128,13 @@ def can_connect(game_map: Map, node: Node, neighbor: Node) -> bool:
     neighbor_cell = node_to_cell(neighbor)
 
     # Pas une diagonale entre cellule -> Pas de problem
-    if not is_diagonal_between_cells(cell, neighbor_cell): return True
+    def is_diagonal() -> bool:
+        return (
+            cell[0] != neighbor_cell[0]
+            and cell[1] != neighbor_cell[1]
+        )
+    if not is_diagonal():
+        return True
 
     cell1, cell2 = adjacent_cells_for_diagonal(cell, neighbor_cell)
 
@@ -160,7 +163,10 @@ def build_navmesh(game_map: Map) -> nx.Graph[Node]:
             graph.add_edge(
                 node,
                 neighbor,
-                weight=distance_between_nodes(node, neighbor),
+                weight=distance(
+                    node_to_position(node),
+                    node_to_position(neighbor),
+                ),
             )
     return graph
 

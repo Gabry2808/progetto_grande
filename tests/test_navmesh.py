@@ -3,9 +3,10 @@ from progetto_grande.map import charger_map
 from progetto_grande.navmesh import (
     build_navmesh,
     closest_node,
-    distance_between_nodes,
     nodes_in_cell,
     shortest_path,
+    node_to_position,
+    distance
 )
 
 def test_navmesh_contains_nodes_for_walkable_cells() -> None:
@@ -131,8 +132,20 @@ def test_navmesh_diagonal_weight() -> None:
     diagonal = nodes_in_cell((1, 1))[8]
     horizontal = nodes_in_cell((1, 1))[5]
 
-    assert abs(graph[node][diagonal]["weight"] - distance_between_nodes(node, diagonal)) < 1e-6
-    assert abs(graph[node][horizontal]["weight"] - distance_between_nodes(node, horizontal)) < 1e-6
+    assert abs(
+        graph[node][diagonal]["weight"]
+        - distance(
+            node_to_position(node),
+            node_to_position(diagonal),
+        )
+    ) < 1e-6
+    assert abs(
+        graph[node][horizontal]["weight"]
+        - distance(
+            node_to_position(node),
+            node_to_position(horizontal),
+        )
+    ) < 1e-6
 
 def test_shortest_path_uses_diagonal_when_shorter() -> None:
     lines = [
